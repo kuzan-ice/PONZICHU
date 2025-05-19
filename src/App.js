@@ -1,23 +1,13 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
+import Header from './components/Header';
+import CoinFlipMain from './components/CoinFlipMain';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App min-h-screen gap-[50px]" style={{ backgroundImage: `url(${`./images/background.png`})`, backgroundSize: 'fit-cover', backgroundPosition: 'center' }}>
+      <Header />
+      <CoinFlipMain />
     </div>
   );
 }
