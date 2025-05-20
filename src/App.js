@@ -5,7 +5,7 @@ import CoinFlipMain from './components/CoinFlipMain';
 
 function App() {
   return (
-    <div className="App min-h-screen gap-[50px]" style={{ backgroundImage: `url(${`./images/background.png`})`, backgroundSize: 'fit-cover', backgroundPosition: 'center' }}>
+    <div className="App min-h-screen gap-[50px]" style={{ backgroundImage: `url(${`./images/background.png`})`, backgroundSize: '100% 100%', backgroundPosition: 'center' }}>
       <Header />
       <CoinFlipMain />
     </div>

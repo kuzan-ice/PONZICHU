@@ -36,3 +36,37 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes ripple {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+.animate-ripple {
+  animation: ripple 0.5s linear;
+}
+
+@keyframes coin-flip {
+  0% { transform: rotateY(0deg);}
+  100% { transform: rotateY(720deg);}
+}
+.animate-coin-flip {
+  animation: coin-flip 1s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+.animate-fade-in {
+  animation: fade-in 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0;}
+  to { opacity: 1;}
+}
+.animate-page-fade-in {
+  animation: page-fade-in 0.7s cubic-bezier(0.4,0,0.2,1);
+}
