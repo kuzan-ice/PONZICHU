@@ -128,6 +128,15 @@ const keyframes = `
     transform: scale(1);
   }
 }
+
+@keyframes coinFlip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(1800deg);
+  }
+}
 `;
 
 // Add this style tag right after the keyframes
@@ -157,6 +166,12 @@ const customClasses = `
 
 .animate-scale-in {
   animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-coin-flip {
+  animation: coinFlip 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 `;
 
@@ -214,6 +229,7 @@ function CoinFlipMain() {
   const [pressedIdx, setPressedIdx] = useState(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipResult, setFlipResult] = useState(null);
+  const [selectedSide, setSelectedSide] = useState(null);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -241,12 +257,15 @@ function CoinFlipMain() {
   }, []);
 
   const handleFlip = () => {
+    if (isFlipping) return;
     setIsFlipping(true);
+    
+    const result = Math.random() > 0.5 ? 1 : 0;
+    
     setTimeout(() => {
       setIsFlipping(false);
-      // Simulate result: 0 for heads, 1 for tails
-      setFlipResult(Math.random() > 0.5 ? 1 : 0);
-    }, 1000);
+      setFlipResult(result);
+    }, 2000);
   };
 
   return (
@@ -285,13 +304,14 @@ function CoinFlipMain() {
                 className='flex flex-col bg-[#A2A2A296] rounded-[26px] py-3 px-5 items-center justify-center w-[45%]
                 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg cursor-pointer
                 group relative overflow-hidden animate-coin-pulse'
+                onClick={() => setSelectedSide('head')}
               >
                 <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
                   translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000' />
                 <img 
                   src="/images/left-coin-2.png" 
                   alt="coin Logo" 
-                  className="w-full h-auto transition-transform duration-300 group-hover:animate-coin-hover" 
+                  className={`w-full h-auto transition-transform duration-300 group-hover:animate-coin-hover ${isFlipping ? 'animate-coin-flip' : ''}`}
                 />
                 <span className="font-['Bowlby_One'] font-normal text-sm md:text-[20px] whitespace-nowrap leading-[100%] tracking-normal text-center align-middle
                   transition-all duration-300 group-hover:text-white">HEAD (x0)</span>
@@ -300,13 +320,14 @@ function CoinFlipMain() {
                 className='flex flex-col bg-[#F2C521] rounded-[26px] py-3 px-5 items-center justify-center w-[45%]
                 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg cursor-pointer
                 group relative overflow-hidden animate-coin-pulse'
+                onClick={() => setSelectedSide('tails')}
               >
                 <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
-                  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 animate-coin-pulse' />
+                  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000' />
                 <img 
                   src="/images/left-coin-1.png" 
                   alt="coin Logo" 
-                  className="w-full h-auto transition-transform duration-300 group-hover:animate-coin-hover" 
+                  className={`w-full h-auto transition-transform duration-300 group-hover:animate-coin-hover ${isFlipping ? 'animate-coin-flip' : ''}`}
                 />
                 <span className="font-['Bowlby_One'] font-normal text-sm md:text-[20px] whitespace-nowrap leading-[100%] tracking-normal text-center align-middle
                   transition-all duration-300 group-hover:text-black">TAILS (x2)</span>
@@ -352,7 +373,7 @@ function CoinFlipMain() {
             ))}
           </div>
           <div className='flex lg:hidden flex-col w-full h-auto gap-5'>
-            <span className="font-['Bowlby_One'] font-normal text-xl text-[#000000CC] leading-[100%] tracking-normal align-middle text-start">YOUR CHOICE</span>
+            <span className="font-['Bowlby_One'] font-normal text-xl text-[#000000CC] leading-[100%] text-start tracking-normal align-middle">YOUR CHOICE</span>
             <div className='flex flex-row w-full h-auto gap-3 justify-between items-center'>
               <div 
                 className='flex flex-col bg-[#A2A2A296] rounded-[26px] py-3 px-5 items-center justify-center w-[45%] min-[500px]:w-1/3 min-[1440px]:w-1/2
@@ -364,7 +385,7 @@ function CoinFlipMain() {
                 <img 
                   src="/images/left-coin-2.png" 
                   alt="coin Logo" 
-                  className="w-full h-auto transition-transform duration-300 group-hover:animate-coin-hover" 
+                  className={`w-full h-auto transition-transform duration-300 group-hover:animate-coin-hover ${isFlipping ? 'animate-coin-flip' : ''}`}
                 />
                 <span className="font-['Bowlby_One'] font-normal text-sm md:text-xl leading-[100%] tracking-normal text-center align-middle
                   transition-all duration-300 group-hover:text-white">HEAD (x0)</span>
@@ -379,7 +400,7 @@ function CoinFlipMain() {
                 <img 
                   src="/images/left-coin-1.png" 
                   alt="coin Logo" 
-                  className="w-full h-auto transition-transform duration-300 group-hover:animate-coin-hover" 
+                  className={`w-full h-auto transition-transform duration-300 group-hover:animate-coin-hover ${isFlipping ? 'animate-coin-flip' : ''}`}
                 />
                 <span className="font-['Bowlby_One'] font-normal text-sm md:text-xl leading-[100%] tracking-normal text-center align-middle
                   transition-all duration-300 group-hover:text-black">TAILS (x2)</span>
