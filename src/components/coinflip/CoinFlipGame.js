@@ -126,6 +126,12 @@ const CoinFlipGame = memo(() => {
   // Get window size for responsive design
   const { width: windowWidth } = useWindowSize();
 
+  // Define result images
+  const resultImages = {
+    heads: '/images/left-coin-2.png',
+    tails: '/images/left-coin-1.png'
+  };
+
   // Game logic
   const {
     isFlipping,
@@ -133,8 +139,7 @@ const CoinFlipGame = memo(() => {
     selectedSide,
     showToast,
     toastMessage,
-    showResult,
-    resultMessage,
+    flipHistory,
     handleBetButtonClick,
     handleFlip,
     handleSelectSide,
@@ -142,26 +147,21 @@ const CoinFlipGame = memo(() => {
   } = useGameLogic();
 
   // Calculate visible coins based on window width
-  const coinImages = [
-    '/images/left-coin-1.png',
-    '/images/left-coin-2.png',
-    '/images/left-coin-1.png',
-    '/images/left-coin-2.png',
-    '',
-    '',
-    '',
-    '',
-  ];
-
-  let visibleCoins = coinImages;
+  let maxVisibleResults = 8;
   if (windowWidth < 678) {
-    visibleCoins = coinImages.slice(0, 3);
+    maxVisibleResults = 3;
   }
   else if (windowWidth < 1440) {
-    visibleCoins = coinImages.slice(0, 4);
+    maxVisibleResults = 4;
   } else {
-    visibleCoins = coinImages.slice(0, 7);
+    maxVisibleResults = 7;
   }
+
+  // Take only most recent results, limited by screen size
+  const visibleResults = flipHistory ? [...flipHistory].slice(0, maxVisibleResults) : [];
+  
+  // Fill remaining slots with empty divs if needed
+  const emptySlots = Math.max(0, maxVisibleResults - visibleResults.length);
 
   return (
     <main className="animate-page-fade-in flex flex-col gap-[50px] container mx-auto p-4 w-full h-full pb-[30px] max-w-[1440px]">
@@ -195,7 +195,7 @@ const CoinFlipGame = memo(() => {
             {/* Left stats */}
             <div className='flex flex-col w-auto h-auto min-w-0 md:min-w-[130px] animate-slide-left' style={{ animationDelay: '0.2s' }}>
               <span className="font-['Bowlby_One'] font-normal text-xl md:text-3xl xl:text-5xl leading-[100%] tracking-normal text-center align-middle animate-glow">
-                4
+                {flipHistory?.length || 0}
               </span>
               <span className="font-['Bowlby_One'] font-normal text-sm md:text-xl xl:text-2xl leading-[100%] tracking-normal text-center align-middle animate-scale-in" style={{ animationDelay: '0.4s' }}>
                 SERIES
@@ -209,13 +209,6 @@ const CoinFlipGame = memo(() => {
                 result={flipResult}
                 selectedSide={selectedSide}
               />
-              {/*               
-              {showResult && (
-                <div className={`mt-4 text-center text-xl font-bold ${resultMessage.includes('Win') ? 'text-green-600' : 'text-red-600'} 
-                animate-bounce transition-all duration-300 min-h-[28px]`}>
-                  {resultMessage}
-                </div>
-              )} */}
             </div>
 
             {/* Right stats */}
@@ -231,17 +224,22 @@ const CoinFlipGame = memo(() => {
 
           {/* Coin history thumbnails */}
           <div className='flex flex-row w-full h-auto gap-2 justify-between items-center'>
-            {visibleCoins.map((imageSrc, index) => (
+            {visibleResults.map((result, index) => (
               <div key={index} className='flex justify-center items-center min-w-[60px] min-h-[60px] md:min-w-[85px] md:min-h-[85px] min-[1440px]:min-w-[100px] min-[1440px]:min-h-[100px] bg-[#A2A2A296] p-4 rounded-[26px]'>
-                {imageSrc ? (
-                  <img
-                    src={imageSrc}
-                    alt={`Coin ${index}`}
-                    className='h-full w-auto max-w-[60px] max-h-[60px] md:max-w-[85px] md:max-h-[85px] min-[1440px]:max-w-[100px] min-[1440px]:max-h-[100px]'
-                  />
-                ) : (
-                  <div className='h-full w-full bg-transparent min-w-[60px] min-h-[60px] md:min-w-[85px] md:min-h-[85px] min-[1440px]:min-w-[100px] min-[1440px]:min-h-[100px]'></div>
-                )}
+                <img
+                  src={resultImages[result]}
+                  alt={`Flip result: ${result}`}
+                  className='h-full w-auto max-w-[60px] max-h-[60px] md:max-w-[85px] md:max-h-[85px] min-[1440px]:max-w-[100px] min-[1440px]:max-h-[100px]'
+                />
+              </div>
+            ))}
+            {/* Empty slots */}
+            {Array(emptySlots).fill().map((_, index) => (
+              <div 
+                key={`empty-${index}`} 
+                className='flex justify-center items-center min-w-[60px] min-h-[60px] md:min-w-[85px] md:min-h-[85px] min-[1440px]:min-w-[100px] min-[1440px]:min-h-[100px] bg-[#A2A2A296] p-4 rounded-[26px]'
+              >
+                <div className='h-full w-auto min-w-[60px] min-h-[60px] md:min-w-[85px] md:min-h-[85px] min-[1440px]:min-w-[95px] min-[1440px]:min-h-[95px] bg-transparent'></div>
               </div>
             ))}
           </div>

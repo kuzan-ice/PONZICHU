@@ -12,6 +12,7 @@ const useGameLogic = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
+  const [flipHistory, setFlipHistory] = useState([]);
 
   // Handle bet button click
   const handleBetButtonClick = useCallback((label) => {
@@ -50,6 +51,10 @@ const useGameLogic = () => {
         `You Win! ${randomResult === 0 ? 'HEADS' : 'TAILS'} was correct!` : 
         `You Lose! ${randomResult === 0 ? 'HEADS' : 'TAILS'} came up.`);
       setShowResult(true);
+
+      // Add this flip to the history
+      const resultName = randomResult === 0 ? 'heads' : 'tails';
+      setFlipHistory(prevHistory => [resultName, ...prevHistory]);
     }, 2000);
   }, [selectedSide]);
 
@@ -72,6 +77,7 @@ const useGameLogic = () => {
     toastMessage,
     showResult,
     resultMessage,
+    flipHistory,
     
     // Game actions
     handleBetButtonClick,

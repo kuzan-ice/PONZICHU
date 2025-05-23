@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
 /**
  * Custom hook to manage coin flip animation
@@ -14,57 +14,8 @@ const useCoinAnimation = ({ isFlipping, result }) => {
   const animationRef = useRef(null);
   const rotationRef = useRef(0);
   
-  // Load images when component mounts
-  useEffect(() => {
-    const headsImage = headsImageRef.current;
-    const tailsImage = tailsImageRef.current;
-    
-    headsImage.src = '/images/left-coin-2.png'; // Heads side
-    tailsImage.src = '/images/left-coin-1.png'; // Tails side
-    
-    // Wait for all images to load
-    let loadedCount = 0;
-    const onImageLoad = () => {
-      loadedCount++;
-      if (loadedCount === 2) {
-        // All images loaded, render initial state
-        renderCoin(0);
-      }
-    };
-    
-    headsImage.onload = onImageLoad;
-    tailsImage.onload = onImageLoad;
-    
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-  
-  // Handle changes in flipping state
-  useEffect(() => {
-    if (isFlipping) {
-      // Start the flip animation with the predetermined result
-      startFlipAnimation();
-    } else if (result !== null) {
-      // When flipping ends, do NOT change the rotation
-      // Just keep the current rotation that already shows the correct result
-      // The rotation was set during animation to end at the correct position
-    } else {
-      // Gentle floating animation when idle
-      startFloatingAnimation();
-    }
-    
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [isFlipping, result]);
-  
   // Render the coin with the current rotation - side determined naturally by rotation
-  const renderCoin = (rotation) => {
+  const renderCoin = useCallback((rotation) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -103,10 +54,43 @@ const useCoinAnimation = ({ isFlipping, result }) => {
     
     // Restore the canvas state
     ctx.restore();
-  };
+  }, []);
+  
+  // Load images when component mounts
+  useEffect(() => {
+    const headsImage = headsImageRef.current;
+    const tailsImage = tailsImageRef.current;
+    
+    headsImage.src = '/images/left-coin-2.png'; // Heads side
+    tailsImage.src = '/images/left-coin-1.png'; // Tails side
+    
+    // Wait for all images to load
+    let loadedCount = 0;
+    const onImageLoad = () => {
+      loadedCount++;
+      if (loadedCount === 2) {
+        // All images loaded, render initial state
+        renderCoin(0);
+      }
+    };
+    
+    headsImage.onload = onImageLoad;
+    tailsImage.onload = onImageLoad;
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [renderCoin]);
+  
+  // Easing functions for smooth animation
+  const easeOutQuint = useCallback((x) => {
+    return 1 - Math.pow(1 - x, 5);
+  }, []);
   
   // Completely revised animation to ensure the side doesn't change after stopping
-  const startFlipAnimation = () => {
+  const startFlipAnimation = useCallback(() => {
     let startTime = null;
     const duration = 2000; // 2 seconds for a flip
     
@@ -163,10 +147,10 @@ const useCoinAnimation = ({ isFlipping, result }) => {
     };
     
     animationRef.current = requestAnimationFrame(animate);
-  };
+  }, [result, easeOutQuint, renderCoin]);
   
   // Gentle floating animation when idle
-  const startFloatingAnimation = () => {
+  const startFloatingAnimation = useCallback(() => {
     let startTime = null;
     
     // Get current rotation and analyze it
@@ -205,17 +189,33 @@ const useCoinAnimation = ({ isFlipping, result }) => {
     };
     
     animationRef.current = requestAnimationFrame(animate);
-  };
+  }, [result, renderCoin]);
   
-  // Easing functions for smooth animation
-  const easeOutQuint = (x) => {
-    return 1 - Math.pow(1 - x, 5);
-  };
+  // Handle changes in flipping state
+  useEffect(() => {
+    if (isFlipping) {
+      // Start the flip animation with the predetermined result
+      startFlipAnimation();
+    } else if (result !== null) {
+      // When flipping ends, do NOT change the rotation
+      // Just keep the current rotation that already shows the correct result
+      // The rotation was set during animation to end at the correct position
+    } else {
+      // Gentle floating animation when idle
+      startFloatingAnimation();
+    }
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isFlipping, result, startFlipAnimation, startFloatingAnimation]);
 
   // Get the current showing side (heads or tails)
-  const getCurrentSide = () => {
+  const getCurrentSide = useCallback(() => {
     return Math.cos(rotationRef.current) > 0 ? 'heads' : 'tails';
-  };
+  }, []);
   
   return {
     canvasRef,
